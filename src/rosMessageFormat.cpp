@@ -56,3 +56,22 @@ RosMessageFormat& RosMessageFormat::operator=(const RosMessageFormat &&source)
 
     return *this;
 }
+
+std::string RosMessageFormat::getLevelMsgInString(int levelNum)
+{
+    switch (levelNum)
+    {
+        case rosgraph_msgs::Log::DEBUG:
+            return "DEBUG";
+        case rosgraph_msgs::Log::INFO:
+            return "INFO";
+        case rosgraph_msgs::Log::WARN:
+            return "WARN";
+        case rosgraph_msgs::Log::ERROR:
+            return "ERROR";
+        case rosgraph_msgs::Log::FATAL:
+            return "FATAL";
+        default:
+            return "";
+    }
+}

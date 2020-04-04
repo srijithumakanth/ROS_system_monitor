@@ -64,7 +64,7 @@ class RosMessageFormat
         std::string level_;
 
         // typical behaviours
-        std::string getLevelMsgInString(int levelNum_);
+        std::string getLevelMsgInString(int levelNum);
 };
 
 #endif
