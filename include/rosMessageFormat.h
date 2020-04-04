@@ -28,6 +28,11 @@ string[] topics # topic names that the node publishes
 #ifndef ROSMESSAGEFORMAT_H
 #define ROSMESSAGEFORMAT_H
 
+// ROS headers
+#include "ros/ros.h"
+#include "rosgraph_msgs/Log.h"
+
+// Logic header
 #include <string>
 
 class RosMessageFormat

@@ -1,7 +1,3 @@
-// ROS headers
-#include "ros/ros.h"
-#include "rosgraph_msgs/Log.h"
-
 // Class header
 #include "rosMessageFormat.h"
 
