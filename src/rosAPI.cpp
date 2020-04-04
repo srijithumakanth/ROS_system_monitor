@@ -89,3 +89,57 @@ std::string RosAPI::getROSApiUri(const std::string& nodeName)
     // Finally the stuff that we really care about
     return (std::string)result[2];
 }
+
+ros::V_string RosAPI::getNodes()
+{
+    ros::V_string node;
+
+    if (!ros::master::getNodes(node))
+    {
+        throw std::runtime_error("ROS_API::getROSApiUri ==> ros::master::getNodes(nodeName) call failed!");
+    }
+
+    return node;
+}
+
+int RosAPI::getNodePid(const std::string& nodeName)
+{
+    auto nodeApiUri = getROSApiUri(nodeName);
+
+    XmlRpc::XmlRpcValue param, result;
+
+    std::string host;
+    uint32_t port;
+
+    if (!ros::network::splitURI(nodeApiUri, host, port))
+    {
+        throw std::runtime_error("ROS_API::getNodePid ==> ros::network::splitURI() call failed!");
+    }
+
+    auto xmlRpcClient = XmlRpc::XmlRpcClient(host.c_str(), port);
+    xmlRpcClient.execute("getPid", param, result);
+
+    // Setup to catch all runtime error expections in case XMLRPC parsing is wrong
+    if(result.size() != 3)
+    {
+        throw std::runtime_error("ROS_API::getNodePid ==> Expected 3 values in getPid result!");
+    }
+
+    if (result[0].getType() != XmlRpc::XmlRpcValue::Type::TypeInt)
+    {
+        throw std::runtime_error("ROS_API::getNodePid ==> Expected getPid reponse value 0 to be Int!");
+    }
+
+    if ((int)result[0] != 1)
+    {
+        throw std::runtime_error("ROS_API::getNodePid ==> Expected getPid code to be 1!");
+    }
+
+    if (result[2].getType() != XmlRpc::XmlRpcValue::Type::TypeInt)
+    {
+        throw std::runtime_error("ROS_API::getNodePid ==> Expected getPid reponse value 2 to be Int!");
+    }
+
+    // Finally the stuff that we really care about
+    return (int)result[2];
+}
