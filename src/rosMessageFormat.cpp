@@ -34,3 +34,25 @@ RosMessageFormat& RosMessageFormat::operator=(const RosMessageFormat& source)
 
     return *this;
 }
+
+RosMessageFormat::RosMessageFormat (RosMessageFormat &&source)
+{
+    nodeSourceName_ = std::move(source.nodeSourceName_);
+    levelNum_ = std::move(source.levelNum_);
+    message_ = std::move(source.message_);
+    level_ = std::move(source.level_);
+}
+
+RosMessageFormat& RosMessageFormat::operator=(const RosMessageFormat &&source)
+{
+    if (this == &source)
+    {
+        return *this;
+    }
+    nodeSourceName_ = std::move(source.nodeSourceName_);
+    levelNum_ = std::move(source.levelNum_);
+    message_ = std::move(source.message_);
+    level_ = std::move(source.level_);
+
+    return *this;
+}
