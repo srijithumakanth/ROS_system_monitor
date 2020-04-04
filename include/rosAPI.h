@@ -21,6 +21,14 @@ class RosAPI
         std::vector<int> getPids();
 
     private:
+        // Get ROS API URI
+        std::string getROSApiUri(const std::string& nodeName);
         
+        // Function to get ROS nodes from ros::master class
+        ros::V_string getNodes();
 
-}
+        // Get process ID's of the ROS nodes from ROS Master API using XMLRPC client (ROS internals has XMLRPC implementaion)
+        int getNodePid(const std::string& nodeName);       
+};
+
+#endif
