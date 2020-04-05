@@ -1,22 +1,55 @@
-# ROS-System-Monitor
+# ``ROS-System-Monitor``
 
-Starter code for System Monitor Project in the Object Oriented Programming Course of the [Udacity C++ Nanodegree Program](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213). 
+## `Overview`
 
-Follow along with the classroom lesson to complete the project!
+A C++ program similar to " htop " , to display memory and CPU utilization by ROS process nodes.
+
+The program also displays ROS logging console messages published by various ROS nodes and services running on the ROS master.
+
+`Example Output:`
 
 ![System Monitor](images/ROS_system_monitor.png)
 
-## Udacity Linux Workspace
-[Udacity](https://www.udacity.com/) provides a browser-based Linux [Workspace](https://engineering.udacity.com/creating-a-gpu-enhanced-virtual-desktop-for-udacity-497bdd91a505) for students. 
+## `Demo`
 
-You are welcome to develop this project on your local machine, and you are not required to use the Udacity Workspace. However, the Workspace provides a convenient and consistent Linux development environment we encourage you to try.
+### `System Requirements:`
+1. [Docker](https://www.docker.com)
+2. Linux - tested on Ubuntu Desktop 18.04.4
+   * [Docker installation instructions](https://docs.docker.com/install/linux/docker-ce/ubuntu)
+3. Windows - tested on Windows 10 Pro version 1909
+   * [Docker install download](https://www.docker.com/products/docker-desktop)
+   * Docker configured to use Linux containers
 
-## ncurses
-[ncurses](https://www.gnu.org/software/ncurses/) is a library that facilitates text-based graphical output in the terminal. This project relies on ncurses for display output.
+## `Instructions`
+1. Clone the project repository
+```bash
+    git clone https://github.com/srijithumakanth/ROS_system_monitor.git
+```
+2. Build Docker Image
+```bash
+    cd ROS_system_monitor
+    cd Docker
+    docker build --tag ros_system_monitor .
+``` 
+3. Run Docker container from image
+   
+   #### `Expected Behavior:`
+   Container will start the ROS Master, pause for 10 seconds to allow the ROS Master and test nodes to come up, and then start ros_system_monitor.
 
-Within the Udacity Workspace, `.student_bashrc` automatically installs ncurses every time you launch the Workspace.
+   ROS node processor's and memory utilization will be displayed.
 
-If you are not using the Workspace, install ncurses within your own Linux environment: `sudo apt install libncurses5-dev libncursesw5-dev`
+   Most recent ROS messages from the running nodes will be displayed. Number of messages displayed will depend on available screen space (Automatically set).
+
+   Press `CTRL-C` to close ros_monitor.
+```bash
+    docker run -it --name ros_system_monitor_test ros_system_monitor
+```
+
+4. To clean up after testing
+```bash
+    docker rm ros_system_monitor_test
+    docker rmi ros_system_monitor
+```
 
 ## Make
 This project uses [Make](https://www.gnu.org/software/make/). The Makefile has four targets:
