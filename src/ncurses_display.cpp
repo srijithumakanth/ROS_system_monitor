@@ -11,24 +11,104 @@
 using std::string;
 using std::to_string;
 
-// 50 bars uniformly displayed from 0 - 100 %
-// 2% is one bar(|)
-std::string NCursesDisplay::ProgressBar(float percent) {
-  std::string result{"0%"};
-  int size{50};
-  float bars{percent * size};
-
-  for (int i{0}; i < size; ++i) {
-    result += i <= bars ? '|' : ' ';
-  }
-
-  string display{to_string(percent * 100).substr(0, 4)};
-  if (percent < 0.1 || percent == 1.0)
-    display = " " + to_string(percent * 100).substr(0, 3);
-  return result + " " + display + "/100%";
+// Class Implementation
+NCursesDisplay::NCursesDisplay()
+{
+  initscr();      // start ncurses
+  noecho();       // do not print input values
+  cbreak();       // terminate ncurses on ctrl + c
+  start_color();  // enable color
 }
 
-void NCursesDisplay::DisplaySystem(System& system, WINDOW* window) {
+NCursesDisplay::~NCursesDisplay()
+{
+  endwin();
+}
+
+NCursesDisplay::NCursesDisplay(System& system, RosMessages& rosMsgs)
+{
+  // Setup NCurses display window
+  int y_max{getmaxy(stdscr)};
+  int x_max{getmaxx(stdscr)};
+
+  const int system_window_fixed_rows = 2;
+  const int system_window_rows = 7;
+  const int system_window_total_rows = system_window_fixed_rows + system_window_rows;
+  const int system_window_start_y = 0;
+
+  const int process_window_fixed_rows = 3;
+
+  const int message_window_fixed_rows = 3;
+  const int message_window_rows = 10;
+  const int message_window_total_rows = message_window_fixed_rows + message_window_rows;
+
+  int process_window_start_y = system_window_start_y + system_window_total_rows;
+  int process_window_rows = y_max - system_window_total_rows - process_window_fixed_rows - message_window_total_rows;
+  int process_window_total_rows = process_window_fixed_rows + process_window_rows;
+
+  int message_window_start_y = process_window_start_y + process_window_total_rows;
+
+  WINDOW* system_window = newwin(system_window_total_rows, x_max, system_window_start_y, 0);
+  WINDOW* process_window = newwin(process_window_fixed_rows + process_window_rows, x_max, process_window_start_y, 0);
+  WINDOW* message_window = newwin(message_window_total_rows, x_max, message_window_start_y, 0);
+
+  rosMsgs.setNumOfMsgsToKeep(message_window_rows);
+
+  while (1) 
+  {
+    init_pair(Colors::Blue, COLOR_BLUE, COLOR_BLACK);
+    init_pair(Colors::Green, COLOR_GREEN, COLOR_BLACK);
+    init_pair(Colors::Cyan, COLOR_CYAN, COLOR_BLACK);
+    init_pair(Colors::Yellow, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(Colors::Red, COLOR_RED, COLOR_BLACK);
+    init_pair(Colors::White, COLOR_WHITE, COLOR_BLACK);
+    init_pair(Colors::Magenta, COLOR_MAGENTA, COLOR_BLACK);
+    box(system_window, 0, 0);
+    DisplaySystem(system, system_window);
+    DisplayProcesses(system.Processes(), process_window, process_window_rows);
+    DisplayMessages(rosMsgs, message_window);
+    box(process_window, 0, 0); // draw box after displaying processes to avoid clearing lines while displaying process info and removing box
+    box(message_window, 0, 0);
+    wrefresh(system_window);
+    wrefresh(process_window);
+    wrefresh(message_window);
+    refresh();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  } 
+}
+
+void NCursesDisplay::DisplayMessages(RosMessages& rosMsgs, WINDOW* window)
+{
+  int row{0};
+  int const source_column{2};
+  int const level_column{22};
+  int const message_column{32};
+
+  werase(window);
+
+  wattron(window, COLOR_PAIR(Colors::Green));
+  mvwprintw(window, ++row, source_column, "SOURCE");
+  mvwprintw(window, row, level_column, "LEVEL");
+  mvwprintw(window, row, message_column, "MESSAGE");
+  wattroff(window, COLOR_PAIR(Colors::Green));
+
+  rosMsgs.refresh();
+
+  auto messages = rosMsgs.getMsgs();
+  for (auto i = 0; i < static_cast<int>(messages.size()); i++) {
+      mvwprintw(window, ++row, source_column, messages[i].getNodeSourceName().c_str());
+
+      auto message_level_color = COLOR_PAIR(getMessageSeverityColor(messages[i].getLevelNum()));
+      wattron(window, message_level_color);
+      mvwprintw(window, row, level_column, messages[i].getLevel().c_str());
+      wattroff(window, message_level_color);
+
+      mvwprintw(window, row, message_column, messages[i].getMessage().c_str());
+  }
+}
+
+void NCursesDisplay::DisplaySystem(System& system, WINDOW* window) 
+{
   int row{0};
   mvwprintw(window, ++row, 2, ("OS: " + system.OperatingSystem()).c_str());
   mvwprintw(window, ++row, 2, ("Kernel: " + system.Kernel()).c_str());
@@ -83,28 +163,40 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   }
 }
 
-void NCursesDisplay::Display(System& system, int n) {
-  initscr();      // start ncurses
-  noecho();       // do not print input values
-  cbreak();       // terminate ncurses on ctrl + c
-  start_color();  // enable color
-
-  int x_max{getmaxx(stdscr)};
-  WINDOW* system_window = newwin(9, x_max - 1, 0, 0);
-  WINDOW* process_window =
-      newwin(3 + n, x_max - 1, system_window->_maxy + 1, 0);
-
-  while (1) {
-    init_pair(1, COLOR_BLUE, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    box(system_window, 0, 0);
-    box(process_window, 0, 0);
-    DisplaySystem(system, system_window);
-    DisplayProcesses(system.Processes(), process_window, n);
-    wrefresh(system_window);
-    wrefresh(process_window);
-    refresh();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-  }
-  endwin();
+int NCursesDisplay::getMessageSeverityColor(int levelNum)
+{
+  switch (levelNum)
+    {
+      case rosgraph_msgs::Log::DEBUG:
+          return Colors::Magenta;
+      case rosgraph_msgs::Log::INFO:
+          return Colors::Cyan;
+      case rosgraph_msgs::Log::WARN:
+          return Colors::Yellow;
+      case rosgraph_msgs::Log::ERROR:
+          return Colors::Red;
+      case rosgraph_msgs::Log::FATAL:
+          return Colors::Red;
+      default:
+            return Colors::White;
+    }
 }
+
+// 50 bars uniformly displayed from 0 - 100 %
+// 2% is one bar(|)
+std::string NCursesDisplay::ProgressBar(float percent) 
+{
+  std::string result{"0%"};
+  int size{50};
+  float bars{percent * size};
+
+  for (int i{0}; i < size; ++i) {
+    result += i <= bars ? '|' : ' ';
+  }
+
+  string display{to_string(percent * 100).substr(0, 4)};
+  if (percent < 0.1 || percent == 1.0)
+    display = " " + to_string(percent * 100).substr(0, 3);
+  return result + " " + display + "/100%";
+}
+
