@@ -55,3 +55,26 @@ void RosMessages::clearOldMsgs(std::deque<RosMessageFormat> &msgQ)
     }
 }
 
+void RosMessages::getMsgsToDisplay()
+{
+    // Lock guard to avoid data race
+    std::lock_guard<std::mutex> lock(rosMsgMutex_);
+
+    clearOldMsgs(rosMsgs_);
+
+    for (auto i = 0; i < static_cast<int>(rosMsgs_.size()); i++)
+    {
+        displayedRosMsgs_.push_back(std::move(rosMsgs_.front()));
+        rosMsgs_.pop_front();
+    }
+}
+
+void RosMessages::rosAggCallback(const rosgraph_msgs::Log& logMsg)
+{
+    RosMessageFormat firstMsg(logMsg.name, logMsg.level, logMsg.msg);
+
+    // Lock guard to avoid data race
+    std::lock_guard<std::mutex> lk(rosMsgMutex_);
+    
+    rosMsgs_.push_back(std::move(firstMsg));
+}
