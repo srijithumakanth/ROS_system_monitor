@@ -16,7 +16,8 @@ class RosMessages
 {
     public:
     // Constructor
-    RosMessages(ros::NodeHandle* nodehandle);
+    RosMessages();
+
 
     // Destructor
     ~RosMessages();

@@ -8,18 +8,25 @@ It contains relevant attributes as shown below
 */
 class Process {
  public:
-  int Pid();                               // TODO: See src/process.cpp
-  std::string User();                      // TODO: See src/process.cpp
-  std::string Command();                   // TODO: See src/process.cpp
-  float CpuUtilization() const;                  // TODO: See src/process.cpp
-  std::string Ram();                       // TODO: See src/process.cpp
-  long int UpTime();                       // TODO: See src/process.cpp
-  bool operator<(const Process& a) const;  // TODO: See src/process.cpp
+    static struct {
+        bool operator()(const Process *a, const Process *b) {
+            return *a < *b;
+        }
+    } SortCompare;
+    
+    // Custom constructor
+    Process(int pid);
+    int Pid();                              
+    std::string User();                     
+    std::string Command();                  
+    float CpuUtilization() const;           
+    std::string Ram();                      
+    long int UpTime();                      
+    bool operator<(const Process& a) const;  
 
-  // Mutator
-  void Pid(int pid){pid_ = pid;}
-  
-  // TODO: Declare any necessary private members
+    // Mutator
+    void Pid(int pid){pid_ = pid;}
+    
  private:
     int pid_;
     // float utilization_ = CpuUtilization();

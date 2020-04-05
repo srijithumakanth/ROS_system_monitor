@@ -2,7 +2,7 @@
 #define ROSAPI_H
 
 #include <string>
-
+#include <vector>
 #include "ros/ros.h"
 
 class RosAPI

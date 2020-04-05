@@ -11,11 +11,18 @@ using std::string;
 using std::to_string;
 using std::vector;
 
+Process::Process(int pid)
+{
+  Pid(pid);
+}
+
 // TODO: Return this process's ID
 int Process::Pid() { return pid_; }
 
 // TODO: Return this process's CPU utilization
 float Process::CpuUtilization() const {
+
+  
   double lastActive = 0, currentActive;
   double cpuFreq = sysconf(_SC_CLK_TCK);
 

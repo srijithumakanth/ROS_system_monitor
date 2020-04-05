@@ -30,7 +30,7 @@ class NCursesDisplay
         ~NCursesDisplay();
 
         // Custom constructor for ROS monitor
-        NCursesDisplay(System& system, RosMessages& rosMsgs);
+        void display(System& system, RosMessages& rosMsgs);
 
     private:
         // Display ROS messages
@@ -40,7 +40,7 @@ class NCursesDisplay
         void DisplaySystem(System& system, WINDOW* window);
         
         // Display Processes
-        void DisplayProcesses(std::vector<Process>& processes, WINDOW* window, int n);
+        void DisplayProcesses(std::vector<Process*>& processes, WINDOW* window, int n);
 
         // Function to give color to ROS log level severity msgs
         int getMessageSeverityColor(int levelNum);

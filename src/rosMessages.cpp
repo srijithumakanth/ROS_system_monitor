@@ -2,7 +2,7 @@
 #include "rosMessages.h"
 
 // Class Implementaion
-RosMessages::RosMessages(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
+RosMessages::RosMessages()
 {
     subThread_ = std::thread(&RosMessages::initizatizeSubscribers, this);
 }
@@ -15,7 +15,7 @@ RosMessages::~RosMessages()
 
 void RosMessages::initizatizeSubscribers()
 {
-    ROS_INFO("Initializing Subscribers");
+    // ROS_INFO("Initializing Subscribers");
     sub_ = nh_.subscribe("/rosout_agg", 1000, &RosMessages::rosAggCallback, this);
     ros::spin();
 }

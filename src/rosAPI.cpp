@@ -2,7 +2,8 @@
 #include "rosAPI.h"
 
 // ROS headers
-#include "xmlrpcpp/XmlRpcClient.h"
+// #include "xmlrpcpp/XmlRpcClient.h"
+#include <XmlRpcClient.h>
 #include "ros/master.h"
 #include "ros/network.h"
 
@@ -15,8 +16,9 @@ RosAPI::RosAPI()
 {
     int argc = 0;
     char* argv[0];
+
     // Initialize ROS API node
-    ros::init(argc, argv, "ROS_API");
+    ros::init(argc, argv, "ros_api", ros::init_options::NoSigintHandler);
 }
 
 RosAPI::~RosAPI()
@@ -38,10 +40,8 @@ std::vector<int> RosAPI::getPids()
     for (auto node : nodes)
     {
         // To not add itself (the ROS_API node) on to the monitor display
-        if (node == "/ros_api")
-        {
-            continue;
-        }
+        if (node == "/ros_api") continue;
+        
         pids.push_back(getNodePid(node));
     }
 
@@ -50,44 +50,46 @@ std::vector<int> RosAPI::getPids()
 
 std::string RosAPI::getROSApiUri(const std::string& nodeName)
 {
-    XmlRpc::XmlRpcValue args, result, payload;
+    XmlRpc::XmlRpcValue args;
+    XmlRpc::XmlRpcValue response;
+    XmlRpc::XmlRpcValue payload;
 
-    args[0] = "ROS_API"; // Name of the node
+    args[0] = "ros_api"; // Name of the node
     args[1] = nodeName;
 
     // Setup to catch all runtime error expections in case XMLRPC parsing is wrong
-    if (!ros::master::execute("lookupnode", args, result, payload, false))
+    if (!ros::master::execute("lookupNode", args, response, payload, false))
     {
         throw std::runtime_error("ROS_API::getROSApiUri ==> ros::master::execute call failed!");
     }
     
-    if (result.size() != 3)
+    if (response.size() != 3)
     {
         throw std::runtime_error("ROS_API::getROSApiUri ==> Expected 3 values in lookupnode response result!");
     }
 
-    if (result[0].getType() != XmlRpc::XmlRpcValue::Type::TypeInt)
+    if (response[0].getType() != XmlRpc::XmlRpcValue::Type::TypeInt)
     {
         throw std::runtime_error("ROS_API::getROSApiUri ==> Expected lookupnode result response value 0 to be of type Int!");
     }
 
-    if ((int)result[0] != 1)
+    if ((int)response[0] != 1)
     {
         throw std::runtime_error("ROS_API::getROSApiUri ==> Expected lookupNode code to be 1");
     }
 
-    if (result[1].getType() != XmlRpc::XmlRpcValue::Type::TypeString)
+    if (response[1].getType() != XmlRpc::XmlRpcValue::Type::TypeString)
     {
         throw std::runtime_error("ROS_API::getROSApiUri ==> Expected lookupNode result reponse value 1 to be string!");
     }
 
-    if (result[2].getType() != XmlRpc::XmlRpcValue::Type::TypeString)
+    if (response[2].getType() != XmlRpc::XmlRpcValue::Type::TypeString)
     {
         throw std::runtime_error("ROS_API::getROSApiUri ==> Expected lookupNode result reponse value 2 to be string!");
     }
 
     // Finally the stuff that we really care about
-    return (std::string)result[2];
+    return (std::string)response[2];
 }
 
 ros::V_string RosAPI::getNodes()
