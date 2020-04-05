@@ -1,13 +1,14 @@
 apt-get update && apt-get install -y \
+     apt-utils \
      build-essential \
      libncurses5-dev \
      libncursesw5-dev
 
-source /opt/ros/kinetic/setup.bash
+source /opt/ros/melodic/setup.bash
 
 git clone https://github.com/srijithumakanth/ROS_system_monitor.git
 cd ROS_system_monitor
 mkdir build
 cd build
-cmake ../
+cmake ..
 make
