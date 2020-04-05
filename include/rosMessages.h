@@ -42,6 +42,7 @@ class RosMessages
 
         // Setup subscribers
         void initizatizeSubscribers();
+        void getMsgsToDisplay();
         void clearOldMsgs(std::deque<RosMessageFormat> &msgQ);
         void rosAggCallback(const rosgraph_msgs::Log& logMsg);
 };
