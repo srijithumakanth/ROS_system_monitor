@@ -51,24 +51,73 @@ The program also displays ROS logging console messages published by various ROS 
     docker rmi ros_system_monitor
 ```
 
-## Make
-This project uses [Make](https://www.gnu.org/software/make/). The Makefile has four targets:
-* `build` compiles the source code and generates an executable
-* `format` applies [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) to style the source code
-* `debug` compiles the source code and generates an executable, including debugging symbols
-* `clean` deletes the `build/` directory, including all of the build artifacts
+## `Rubric:`
 
-## Instructions
+### `Rubric Criteria Met:`
 
-1. Clone the project repository: `git clone https://github.com/udacity/CppND-System-Monitor-Project-Updated.git`
+#### `README (All Rubric Points REQUIRED):`
 
-2. Build the project: `make build`
+1. A README with instructions is included with the project.
+2. The README indicates which project is chosen.
+3. The README includes information about each rubric point addressed.
 
-3. Run the resulting executable: `./build/monitor`
-![Starting System Monitor](images/starting_monitor.png)
+#### `Compiling and Testing (All Rubric Points REQUIRED):`
 
-4. Follow along with the lesson.
+1. The submission must compile and run.
+    * The code base is compiled as a Docker image and run inside of a Docker Container.
 
-5. Implement the `System`, `Process`, and `Processor` classes, as well as functions within the `LinuxParser` namespace.
+#### `Loops, Functions, I/O:`
 
-6. Submit!
+1. The project demonstrates an understanding of C++ functions and control structures.
+    * Varieties of functions and control structures are used throughout the different Class implementations.
+
+#### `Object Oriented Programming:`
+
+1.  The project uses Object Oriented Programming techniques.
+    * Object Oriented Programming is used throughout various Class implementations. 
+2. Classes use appropriate access specifiers for class members.
+    * Appropiate access specifiers are used throughout various Class implementations.
+3. Class constructors utilize member initialization lists.
+    * See RosMessageFormat constructor ([rosMessageFormat.cpp](src/rosMessageFormat.cpp), line 5)
+4. Classes abstract implementation details from their interfaces.
+    * Used throught various Class implementaions.
+5. Classes encapsulate behavior.
+    * Used throught various Class implementaions.
+
+#### `Memory Management:`
+
+1. The project makes use of references in function declarations.
+    * See rosAPI definitons:
+    * getROSApiUri ==> ([rosAPI.h](include/rosAPI.h), line 25)
+    * getNodePid ==> ([rosAPI.h](include/rosAPI.h), line 31) 
+
+2. The project uses destructors appropriately.
+    * RosApi destructor shuts down ROS Master connection ([rosAPI.cpp](src/rosAPI.cpp), line 27)
+    
+    * NCursesDisplay destructor closes NCurses window ([ncurses_display.cpp](src/ncurses_display.cpp),  line 25). Useful when exception is thrown to prevent leaving console in a bad state.
+
+    * RosMessages destructor to appropiately create a thread barrier. ([rosMessages.cpp](src/rosMessages.cpp), line 13)
+
+3. The project uses scope / Resource Acquisition Is Initialization (RAII) where appropriate.
+    * rosAPI acquires connection with ROS Master in constructor and releases connection in destructor.
+
+4. The project follows the Rule of 5.
+    * See definitions of rosMessageFormat ([rosMessageFormat.h](src/rosMessageFormat.h), lines 44 - 57)
+
+5. The project uses move semantics to move data, instead of copying it, where possible.
+    * Move semantics is used in RosMessages to create instance of RosMessage when message callback is called by ROS subscriber. RosMessage instance is then moved to the queue. Messages to display are moved from that queue to the display queue. Results in one instance of RosMessage created in message callback and then that same instance is moved between receive queue and display queue.
+    
+    *  Message created in `RosMessages::rosAggCallback` and then moved to queue (`rosMsgs_`) ([rosMessages.cpp](src/rosMessages.cpp), line 79)
+    
+    * Message instance moved from receive queue to display queue (`displayedRosMsgs_`) `RosMessages::getMsgsToDisplay()` ([rosMessages.cpp](src/rosMessages.cpp), line 67)
+
+#### `Concurrency:`
+
+1. The project uses multithreading.
+    * RosMessages creates thread to subscribe to messages from ROS Master ([rosMessages.cpp](src/rosMessages.cpp), line 7)
+
+2. A mutex or lock is used in the project.
+    * RosMessages uses mutex and lock (`std::lock_guard`) to protect access to receive queue ([rosMsgs_](src/rosMessages.cpp), line 61), as queue is accessed from subscriber thread and display thread.
+
+    * Display queue in RosMessages is only used in the display thread and does not need a mutex.
+
