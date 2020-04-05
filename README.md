@@ -121,3 +121,44 @@ The program also displays ROS logging console messages published by various ROS 
 
     * Display queue in RosMessages is only used in the display thread and does not need a mutex.
 
+### `Classes:`
+
+1. NCursesDisplay (`ncurses_display.h/.cpp`)
+   
+    Handles NCurses API calls to render screen.
+
+2. LinuxParser (`linux_parser.h/.cpp`)
+
+    Parses Linux system info like CPU states, CPU utilizations etc.
+
+3. Process (`process.h/.cpp`)
+
+    Basic class for Linux process representation.
+
+4. Processor (`process.h/.cpp`)
+
+    Basic class for Linux processor representation.
+
+5. ROS API (`rosAPI.h/.cpp`)
+
+    Uses ROS Master API call to retrieve information about ROS nodes and services.
+
+6. ROS Message Format (`rosMessageFormat.h/.cpp`)
+
+    Stores data from ROS message.
+
+7. ROS Messages (`rosMessages.h/.cpp`)
+
+    Subscribes to ROS output messages. Receives ROS messages and stores message data in a queue.
+
+    NCursesDisplay is limited in number of messages that can be displayed based on available screen space. Keeps rolling queue of messages to display on each refresh.
+
+8. System (`system.h/.cpp`)
+
+    Uses classes in LinuxParser namespace to retrieve processor-related values for display by NCursesDisplay.
+
+### `Misc Files:`
+
+1. Format (format.h/.cpp)
+
+    Miscellaneous formatting helper functions.
